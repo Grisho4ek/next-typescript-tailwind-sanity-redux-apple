@@ -1,15 +1,19 @@
+import Cart from '@components/Cart';
+import Header from '@components/Header';
+import Landing from '@components/Landing';
+import ProductCard from '@components/ProductCard';
 import { Tab } from '@headlessui/react';
+import { fetchCategories } from '@utils/fetchCategories';
+import { fetchProducts } from '@utils/fetchProducts';
 import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import Header from '../components/Header';
-import Landing from '../components/Landing';
-import { fetchCategories } from '../utils/fetchCategories';
 
 interface Props {
   categories: Category[];
+  products: { [key: string]: Product[] };
 }
 
-const Home = ({ categories }: Props) => {
+const Home = ({ categories, products }: Props) => {
   return (
     <div>
       <Head>
@@ -17,6 +21,7 @@ const Home = ({ categories }: Props) => {
         <link rel='icon' href='/favicon.ico' />
       </Head>
       <Header />
+      <Cart />
       <main className='relative h-[200vh] bg-[#E7ECEE]'>
         <Landing />
       </main>
@@ -32,10 +37,10 @@ const Home = ({ categories }: Props) => {
                   key={category._id}
                   id={category._id}
                   className={({ selected }) =>
-                    `whitespace-nowrap rounded-t-lg py-3 px-5 text-sm font-light outline-none md:py-4 md:px-6 md:text-base ${
+                    `whitespace-nowrap rounded-t-lg border-b-2 border-[#35383C] py-3 px-5 text-sm font-light outline-none md:py-4 md:px-6 md:text-base ${
                       selected
-                        ? 'borderGradient bg-[#35383C] pb-[5px] text-center text-white'
-                        : 'border-b-2 border-[#35383C] text-[#747474]'
+                        ? 'borderGradient relative bg-[#35383C] text-white'
+                        : 'text-[#747474]'
                     }`
                   }
                 >
@@ -44,10 +49,13 @@ const Home = ({ categories }: Props) => {
               ))}
             </Tab.List>
             <Tab.Panels className='mx-auto max-w-fit pt-10 pb-24 sm:px-4'>
-              {/* <Tab.Panel className='tabPanel'>{showProducts(0)}</Tab.Panel>
-              <Tab.Panel className='tabPanel'>{showProducts(1)}</Tab.Panel>
-              <Tab.Panel className='tabPanel'>{showProducts(2)}</Tab.Panel>
-              <Tab.Panel className='tabPanel'>{showProducts(3)}</Tab.Panel> */}
+              {categories.map((c) => (
+                <Tab.Panel className='tabPanel' key={c._id}>
+                  {(products[c._id] || []).map((p) => (
+                    <ProductCard key={p._id} product={p} />
+                  ))}
+                </Tab.Panel>
+              ))}
             </Tab.Panels>
           </Tab.Group>
         </div>
@@ -60,9 +68,23 @@ export default Home;
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
   const categories = await fetchCategories();
+  const products = await fetchProducts();
+
   return {
     props: {
       categories,
+      products: products.reduce(
+        (
+          acc: {
+            [key: string]: Product[];
+          },
+          item
+        ) => {
+          acc[item.category._ref] = [...(acc[item.category._ref] || []), item];
+          return acc;
+        },
+        {}
+      ),
     },
   };
 };

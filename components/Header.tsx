@@ -6,9 +6,12 @@ import {
   ShoppingBagIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
+import { useAppSelector } from '@store/useAppSelector';
+import { getCartItems } from '@store/cartSlice';
 
 const Header = () => {
   const session = false;
+  const items = useAppSelector(getCartItems);
 
   return (
     <header className='sticky top-0 z-30 flex w-full items-center justify-between bg-[#E7ECEE] p-4'>
@@ -36,9 +39,11 @@ const Header = () => {
         <MagnifyingGlassIcon className='headerIcon' />
         <Link href='/'>
           <div className='relative cursor-pointer'>
-            <span className='absolute -right-1 -top-1 z-50 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-violet-500 text-[10px] text-white'>
-              5
-            </span>
+            {!!items.length && (
+              <span className='absolute -right-1 -top-1 z-50 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-violet-500 text-[10px] text-white'>
+                {items.length}
+              </span>
+            )}
             <ShoppingBagIcon className='headerIcon' />
           </div>
         </Link>
