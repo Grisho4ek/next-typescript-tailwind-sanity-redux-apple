@@ -8,9 +8,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAppSelector } from '@store/useAppSelector';
 import { getCartItems } from '@store/cartSlice';
+import { signIn, signOut, useSession } from 'next-auth/react';
 
 const Header = () => {
-  const session = false;
+  const { data: session } = useSession();
   const items = useAppSelector(getCartItems);
 
   return (
@@ -50,20 +51,17 @@ const Header = () => {
         {session ? (
           <Image
             src={
-              // session.user?.image ||
+              session.user?.image ||
               'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'
             }
             alt=''
             className='cursor-pointer rounded-full'
             width={34}
             height={34}
-            // onClick={() => signOut()}
+            onClick={() => signOut()}
           />
         ) : (
-          <UserIcon
-            className='headerIcon'
-            // onClick={() => signIn()}
-          />
+          <UserIcon className='headerIcon' onClick={() => signIn()} />
         )}
       </div>
     </header>

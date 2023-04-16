@@ -6,11 +6,14 @@ import { Tab } from '@headlessui/react';
 import { fetchCategories } from '@utils/fetchCategories';
 import { fetchProducts } from '@utils/fetchProducts';
 import type { GetServerSideProps } from 'next';
+import { Session } from 'next-auth';
+import { getSession } from 'next-auth/react';
 import Head from 'next/head';
 
 interface Props {
   categories: Category[];
   products: { [key: string]: Product[] };
+  session: Session | null;
 }
 
 const Home = ({ categories, products }: Props) => {
@@ -65,12 +68,14 @@ const Home = ({ categories, products }: Props) => {
 
 export default Home;
 
-export const getServerSideProps: GetServerSideProps<Props> = async () => {
+export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const categories = await fetchCategories();
   const products = await fetchProducts();
+  const session = await getSession(ctx);
 
   return {
     props: {
+      session,
       categories,
       products: products.reduce(
         (
